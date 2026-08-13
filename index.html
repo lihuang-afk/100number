@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数字映射填充器</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: #f5f5f5;
@@ -62,19 +66,14 @@
         tr:hover td.data-cell {
             background: #f0f8ff;
         }
-        .cell-unique {
+        .cell-red {
             background-color: #ff0000 !important;
             color: #fff !important;
             animation: popIn 0.3s ease;
         }
-        .cell-dup {
+        .cell-blue {
             background-color: #2196F3 !important;
             color: #fff !important;
-            animation: popIn 0.3s ease;
-        }
-        .cell-yellow {
-            background-color: #f1c40f !important;
-            color: #333 !important;
             animation: popIn 0.3s ease;
         }
         @keyframes popIn {
@@ -113,41 +112,6 @@
         .digit-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
-        }
-        /* 黄色切换按钮 */
-        .yellow-toggle {
-            display: flex;
-            justify-content: center;
-            margin-top: 4px;
-        }
-        .yellow-btn {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: 2px solid #ccc;
-            background: #f1c40f;
-            cursor: pointer;
-            transition: all 0.2s;
-            padding: 0;
-            position: relative;
-        }
-        .yellow-btn:hover {
-            transform: scale(1.15);
-            border-color: #999;
-        }
-        .yellow-btn.active {
-            border-color: #333;
-            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #f1c40f;
-        }
-        .yellow-btn.active::after {
-            content: "✓";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 11px;
-            color: #333;
-            font-weight: bold;
         }
         .temp-note-area {
             margin-top: 20px;
@@ -204,12 +168,27 @@
             transition: all 0.2s;
             font-family: inherit;
         }
-        .btn-export { background: #27ae60; color: #fff; }
-        .btn-export:hover { background: #219a52; }
-        .btn-import { background: #3498db; color: #fff; }
-        .btn-import:hover { background: #2980b9; }
-        .btn-clear { background: #e74c3c; color: #fff; }
-        .btn-clear:hover { background: #c0392b; }
+        .btn-export {
+            background: #27ae60;
+            color: #fff;
+        }
+        .btn-export:hover {
+            background: #219a52;
+        }
+        .btn-import {
+            background: #3498db;
+            color: #fff;
+        }
+        .btn-import:hover {
+            background: #2980b9;
+        }
+        .btn-clear {
+            background: #e74c3c;
+            color: #fff;
+        }
+        .btn-clear:hover {
+            background: #c0392b;
+        }
         .modal-overlay {
             display: none;
             position: fixed;
@@ -219,7 +198,9 @@
             justify-content: center;
             align-items: center;
         }
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active {
+            display: flex;
+        }
         .modal {
             background: #fff;
             border-radius: 12px;
@@ -228,7 +209,10 @@
             max-width: 500px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
-        .modal h3 { margin-bottom: 15px; color: #333; }
+        .modal h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
         .modal textarea {
             width: 100%;
             height: 150px;
@@ -240,17 +224,29 @@
             resize: vertical;
             outline: none;
         }
-        .modal textarea:focus { border-color: #3498db; }
+        .modal textarea:focus {
+            border-color: #3498db;
+        }
         .modal-btns {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 15px;
         }
-        .btn-confirm { background: #3498db; color: #fff; }
-        .btn-confirm:hover { background: #2980b9; }
-        .btn-cancel { background: #95a5a6; color: #fff; }
-        .btn-cancel:hover { background: #7f8c8d; }
+        .btn-confirm {
+            background: #3498db;
+            color: #fff;
+        }
+        .btn-confirm:hover {
+            background: #2980b9;
+        }
+        .btn-cancel {
+            background: #95a5a6;
+            color: #fff;
+        }
+        .btn-cancel:hover {
+            background: #7f8c8d;
+        }
         .save-status {
             text-align: center;
             color: #27ae60;
@@ -260,7 +256,9 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .save-status.show { opacity: 1; }
+        .save-status.show {
+            opacity: 1;
+        }
         @media (max-width: 768px) {
             .container { padding: 15px; }
             table { font-size: 16px; }
@@ -268,6 +266,7 @@
             .digit-input { width: 22px; height: 22px; font-size: 12px; }
             th { padding: 10px 4px; font-size: 14px; }
             th.input-header, td.input-cell { width: 60px; }
+            .action-bar { justify-content: center; flex-wrap: wrap; }
             h1 { font-size: 20px; }
             .temp-note-textarea { height: 60px; font-size: 14px; }
         }
@@ -279,8 +278,16 @@
         <table>
             <thead>
                 <tr>
-                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
-                    <th>6</th><th>7</th><th>8</th><th>9</th><th>0</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                    <th>7</th>
+                    <th>8</th>
+                    <th>9</th>
+                    <th>0</th>
                     <th class="input-header">输入</th>
                 </tr>
             </thead>
@@ -291,7 +298,7 @@
             <textarea class="temp-note-textarea" id="tempNote" placeholder="临时记录..."></textarea>
         </div>
 
-        <p class="hint">在右侧输入4个数字（0-9），自动映射到左侧对应列；<b style="color:#ff0000">红色=唯一</b>，<b style="color:#2196F3">蓝色=重复</b>；点击黄色圆点切换行颜色</p>
+        <p class="hint">在右侧输入4个数字（0-9），自动映射到左侧对应列；<b style="color:#ff0000">红色=唯一</b>，<b style="color:#2196F3">蓝色=重复</b></p>
         <p class="row-count" id="rowCount">当前行数: 0 / 100</p>
         <p class="save-status" id="saveStatus">已自动保存到本地</p>
 
@@ -332,10 +339,9 @@
             const rows = tbody.querySelectorAll('tr');
             const data = [];
             rows.forEach(row => {
-                const inputs = row.querySelectorAll('input.digit-input');
+                const inputs = row.querySelectorAll('input');
                 const values = Array.from(inputs).map(inp => inp.value);
-                const isYellow = row.dataset.isYellow === 'true';
-                data.push({ values: values, yellow: isYellow });
+                data.push(values);
             });
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -392,7 +398,7 @@
                 tbody.innerHTML = '';
                 rowCounter = 0;
                 tempNote.value = '';
-                for (let r = 0; r < 2; r++) {
+                for (let r = 0; r < 5; r++) {
                     tbody.appendChild(createRow());
                 }
                 updateRowCount();
@@ -411,28 +417,10 @@
             }
         }
 
-        function toggleYellow(rowIdx) {
-            const row = document.querySelector(`tr[data-row-id="${rowIdx}"]`);
-            if (!row) return;
-            const isYellow = row.dataset.isYellow === 'true';
-            row.dataset.isYellow = isYellow ? 'false' : 'true';
-
-            const btn = row.querySelector('.yellow-btn');
-            if (btn) {
-                btn.classList.toggle('active', !isYellow);
-            }
-
-            updateRow(rowIdx);
-            saveToLocal();
-        }
-
-        function createRow(initialData) {
+        function createRow(initialValues) {
             const rowIdx = rowCounter++;
             const tr = document.createElement('tr');
             tr.dataset.rowId = rowIdx;
-
-            const isYellow = (initialData && initialData.yellow) ? true : false;
-            tr.dataset.isYellow = isYellow ? 'true' : 'false';
 
             for (let c = 0; c < 10; c++) {
                 const td = document.createElement('td');
@@ -443,11 +431,6 @@
 
             const inputTd = document.createElement('td');
             inputTd.className = 'input-cell';
-
-            const wrapper = document.createElement('div');
-            wrapper.style.display = 'flex';
-            wrapper.style.flexDirection = 'column';
-            wrapper.style.alignItems = 'center';
 
             const container = document.createElement('div');
             container.className = 'input-group';
@@ -462,32 +445,17 @@
                 inp.placeholder = '';
                 inp.dataset.row = rowIdx;
                 inp.dataset.pos = i;
-                if (initialData && initialData.values && initialData.values[i]) {
-                    inp.value = initialData.values[i];
+                if (initialValues && initialValues[i]) {
+                    inp.value = initialValues[i];
                 }
                 inputs.push(inp);
                 container.appendChild(inp);
             }
 
-            // 黄色切换按钮
-            const toggleDiv = document.createElement('div');
-            toggleDiv.className = 'yellow-toggle';
-            const yellowBtn = document.createElement('button');
-            yellowBtn.className = 'yellow-btn' + (isYellow ? ' active' : '');
-            yellowBtn.title = '点击切换黄色';
-            yellowBtn.onclick = function() {
-                toggleYellow(rowIdx);
-            };
-            toggleDiv.appendChild(yellowBtn);
-
-            wrapper.appendChild(container);
-            wrapper.appendChild(toggleDiv);
-            inputTd.appendChild(wrapper);
-            tr.appendChild(inputTd);
-
             inputs.forEach((inp, idx) => {
                 inp.addEventListener('input', function() {
                     let val = this.value;
+
                     if (val.length > 1) {
                         this.value = val.slice(0, 1);
                         val = this.value;
@@ -496,11 +464,14 @@
                         this.value = '';
                         val = '';
                     }
+
                     updateRow(rowIdx);
                     saveToLocal();
+
                     if (val !== '' && idx < 3) {
                         inputs[idx + 1].focus();
                     }
+
                     if (idx === 3 && val !== '') {
                         setTimeout(() => {
                             const allFilled = inputs.every(input => input.value !== '');
@@ -510,6 +481,7 @@
                         }, 50);
                     }
                 });
+
                 inp.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && this.value === '' && idx > 0) {
                         inputs[idx - 1].focus();
@@ -517,24 +489,23 @@
                 });
             });
 
+            inputTd.appendChild(container);
+            tr.appendChild(inputTd);
             return tr;
         }
 
         function updateRow(rowIdx) {
-            const row = document.querySelector(`tr[data-row-id="${rowIdx}"]`);
             const inputs = document.querySelectorAll(`input[data-row="${rowIdx}"]`);
             const values = Array.from(inputs).map(inp => inp.value);
-            const isYellow = row ? (row.dataset.isYellow === 'true') : false;
 
             for (let c = 0; c < 10; c++) {
                 const cell = document.getElementById(`cell-${rowIdx}-${c}`);
                 if (cell) {
                     cell.textContent = '';
-                    cell.classList.remove('cell-unique', 'cell-dup', 'cell-yellow');
+                    cell.classList.remove('cell-red', 'cell-blue');
                 }
             }
 
-            // 统计重复
             const countMap = {};
             values.forEach(v => {
                 if (v !== '') {
@@ -549,14 +520,10 @@
                         const cell = document.getElementById(`cell-${rowIdx}-${colIdx}`);
                         if (cell) {
                             cell.textContent = val;
-                            if (isYellow) {
-                                cell.classList.add('cell-yellow');
+                            if (countMap[val] >= 2) {
+                                cell.classList.add('cell-blue');
                             } else {
-                                if (countMap[val] >= 2) {
-                                    cell.classList.add('cell-dup');
-                                } else {
-                                    cell.classList.add('cell-unique');
-                                }
+                                cell.classList.add('cell-red');
                             }
                         }
                     }
@@ -582,18 +549,20 @@
         function exportData() {
             const rows = tbody.querySelectorAll('tr');
             const data = [];
+
             rows.forEach(row => {
-                const inputs = row.querySelectorAll('input.digit-input');
+                const inputs = row.querySelectorAll('input');
                 const values = Array.from(inputs).map(inp => inp.value);
-                const isYellow = row.dataset.isYellow === 'true';
                 if (values.some(v => v !== '')) {
-                    data.push(values.join('') + (isYellow ? '|Y' : ''));
+                    data.push(values.join(''));
                 }
             });
+
             if (data.length === 0) {
                 alert('没有可导出的数据！');
                 return;
             }
+
             const text = data.join('\n');
             const blob = new Blob([text], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -604,6 +573,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+
             alert(`已导出 ${data.length} 行数据！`);
         }
 
@@ -623,31 +593,35 @@
                 alert('请输入数据！');
                 return;
             }
+
             const lines = text.split('\n').filter(line => line.trim() !== '');
             const validData = [];
+
             lines.forEach(line => {
-                const isYellow = line.endsWith('|Y');
-                const numPart = isYellow ? line.slice(0, -2) : line;
-                let digits = numPart.replace(/[^0-9]/g, '').split('');
+                let digits = line.replace(/[^0-9]/g, '').split('');
                 if (digits.length >= 4) {
-                    validData.push({ values: digits.slice(0, 4), yellow: isYellow });
+                    validData.push(digits.slice(0, 4));
                 } else if (digits.length > 0) {
                     while (digits.length < 4) digits.push('');
-                    validData.push({ values: digits, yellow: isYellow });
+                    validData.push(digits);
                 }
             });
+
             if (validData.length === 0) {
-                alert('未找到有效的数据！');
+                alert('未找到有效的4位数字数据！');
                 return;
             }
+
             tbody.innerHTML = '';
             rowCounter = 0;
-            validData.forEach((item, idx) => {
+
+            validData.forEach((digits, idx) => {
                 if (idx >= MAX_ROWS) return;
-                const row = createRow(item);
+                const row = createRow(digits);
                 tbody.appendChild(row);
                 updateRow(row.dataset.rowId);
             });
+
             saveToLocal();
             updateRowCount();
             hideImportModal();
@@ -660,6 +634,7 @@
             }
         });
 
+        // 临时记录区自动保存
         tempNote.addEventListener('input', function() {
             saveNoteToLocal();
         });
@@ -667,19 +642,20 @@
         function init() {
             const savedData = loadFromLocal();
             if (savedData && savedData.length > 0) {
-                savedData.forEach(item => {
-                    const row = createRow(item);
+                savedData.forEach(digits => {
+                    const row = createRow(digits);
                     tbody.appendChild(row);
                     updateRow(row.dataset.rowId);
                 });
             } else {
-                for (let r = 0; r < 2; r++) {
+                for (let r = 0; r < 5; r++) {
                     const row = createRow();
                     tbody.appendChild(row);
                 }
             }
             loadNoteFromLocal();
             updateRowCount();
+            // 自动滚动到页面底部
             setTimeout(() => {
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }, 100);
