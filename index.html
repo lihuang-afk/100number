@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>七七七七七</title>
+    <title>数字映射填充器</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -320,7 +320,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>七七七七七</h1>
+        <h1>数字映射填充器</h1>
         <table>
             <thead>
                 <tr>
@@ -331,6 +331,10 @@
             </thead>
             <tbody id="tbody"></tbody>
         </table>
+
+        <div style="text-align: center; margin-top: 10px;">
+            <button class="btn btn-export" onclick="addNewRow()" style="background: #3498db;">+ 添加空白行</button>
+        </div>
 
         <div class="temp-note-area">
             <textarea class="temp-note-textarea" id="tempNote" placeholder="临时记录..."></textarea>
@@ -580,14 +584,7 @@
                     if (val !== '' && idx < 3) {
                         inputs[idx + 1].focus();
                     }
-                    if (idx === 3 && val !== '') {
-                        setTimeout(() => {
-                            const allFilled = inputs.every(input => input.value !== '');
-                            if (allFilled) {
-                                addNewRow();
-                            }
-                        }, 50);
-                    }
+                    // 不再自动添加新行，改为手动添加
                 });
                 inp.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && this.value === '' && idx > 0) {
@@ -653,10 +650,10 @@
             tbody.appendChild(newRow);
             updateRowCount();
             saveToLocal();
-            const firstInput = newRow.querySelector('input.digit-input');
-            if (firstInput) {
-                firstInput.focus();
-            }
+            // 滚动到新添加的行
+            setTimeout(() => {
+                newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
         }
 
         function exportData() {
