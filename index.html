@@ -126,6 +126,7 @@
             align-items: center;
             margin-top: 4px;
             padding: 0 2px;
+            gap: 4px;
         }
         .mark-input {
             width: 28px;
@@ -192,6 +193,45 @@
         .theme-btn-green.active::after {
             color: #fff;
         }
+        .toggle-btn {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            border-radius: 4px;
+            transition: all 0.2s;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .toggle-btn:hover {
+            background: #eee;
+            color: #333;
+        }
+        tr.collapsed {
+            visibility: collapse;
+        }
+        tr.collapsed td {
+            padding: 0 !important;
+            border: none !important;
+            font-size: 0 !important;
+            line-height: 0 !important;
+            height: 0 !important;
+        }
+        tr.collapsed td * {
+            display: none !important;
+        }
+        /* 有隐藏行时，tbody底部显示红色提示线 */
+        tbody.has-collapsed {
+            border-bottom: 2px solid #e74c3c;
+        }
+
+
         .temp-note-area {
             margin-top: 20px;
             text-align: center;
@@ -253,6 +293,25 @@
         .btn-import:hover { background: #2980b9; }
         .btn-clear { background: #e74c3c; color: #fff; }
         .btn-clear:hover { background: #c0392b; }
+        .btn-show-hidden {
+            background: #fff;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+            padding: 8px 20px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        .btn-show-hidden:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+        .btn-show-hidden.show {
+            display: inline-block !important;
+        }
         .modal-overlay {
             display: none;
             position: fixed;
@@ -332,8 +391,9 @@
             <tbody id="tbody"></tbody>
         </table>
 
-        <div style="text-align: center; margin-top: 10px;">
+        <div style="text-align: center; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 12px;">
             <button class="btn btn-export" onclick="addNewRow()" style="background: #3498db;">+ 添加空白行</button>
+            <button class="btn btn-show-hidden" id="showHiddenBtn" onclick="showAllRows()" style="display: none;">取消隐藏</button>
         </div>
 
         <div class="temp-note-area">
@@ -385,7 +445,8 @@
                 const values = Array.from(inputs).map(inp => inp.value);
                 const theme = row.dataset.rowTheme || 'default';
                 const mark = row.querySelector('.mark-input') ? row.querySelector('.mark-input').value : '';
-                data.push({ values: values, theme: theme, mark: mark });
+                const collapsed = row.classList.contains('collapsed');
+                data.push({ values: values, theme: theme, mark: mark, collapsed: collapsed });
             });
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -452,6 +513,47 @@
         function updateRowCount() {
             const rows = tbody.querySelectorAll('tr');
             rowCountDisplay.textContent = `当前行数: ${rows.length} / ${MAX_ROWS}`;
+        }
+
+
+        function toggleRowVisibility(rowIdx) {
+            const row = document.querySelector(`tr[data-row-id="${rowIdx}"]`);
+            if (!row) return;
+            const isCollapsed = row.classList.toggle('collapsed');
+            const btn = row.querySelector('.toggle-btn');
+            if (btn) {
+                btn.innerHTML = isCollapsed ? '🏀' : '⚽';
+                btn.title = isCollapsed ? '点击显示' : '点击隐藏';
+            }
+            updateShowAllBtn();
+            saveToLocal();
+        }
+
+        function updateShowAllBtn() {
+            const collapsedRows = tbody.querySelectorAll('tr.collapsed');
+            const btn = document.getElementById('showHiddenBtn');
+            if (collapsedRows.length > 0) {
+                btn.classList.add('show');
+                btn.textContent = '取消隐藏 (' + collapsedRows.length + ')';
+                tbody.classList.add('has-collapsed');
+            } else {
+                btn.classList.remove('show');
+                tbody.classList.remove('has-collapsed');
+            }
+        }
+
+        function showAllRows() {
+            const collapsedRows = tbody.querySelectorAll('tr.collapsed');
+            collapsedRows.forEach(row => {
+                row.classList.remove('collapsed');
+                const btn = row.querySelector('.toggle-btn');
+                if (btn) {
+                    btn.innerHTML = '⚽';
+                    btn.title = '点击隐藏';
+                }
+            });
+            updateShowAllBtn();
+            saveToLocal();
         }
 
         function removeFirstRow() {
@@ -559,6 +661,21 @@
 
             btnGroup.appendChild(yellowBtn);
             btnGroup.appendChild(greenBtn);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'toggle-btn';
+            toggleBtn.title = '点击隐藏';
+            toggleBtn.innerHTML = '⚽';
+            toggleBtn.onclick = function() {
+                toggleRowVisibility(rowIdx);
+            };
+            btnGroup.appendChild(toggleBtn);
+
+            if (initialData && initialData.collapsed) {
+                tr.classList.add('collapsed');
+                toggleBtn.innerHTML = '🏀';
+                toggleBtn.title = '点击显示';
+            }
 
             row2.appendChild(markInput);
             row2.appendChild(btnGroup);
@@ -748,6 +865,7 @@
             });
             saveToLocal();
             updateRowCount();
+            updateShowAllBtn();
             hideImportModal();
             alert(`成功导入 ${Math.min(validData.length, MAX_ROWS)} 行数据！`);
         }
@@ -778,6 +896,7 @@
             }
             loadNoteFromLocal();
             updateRowCount();
+            updateShowAllBtn();
             setTimeout(() => {
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }, 100);
