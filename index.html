@@ -364,7 +364,14 @@
         }
         .save-status.show { opacity: 1; }
         @media (max-width: 768px) {
-            .container { padding: 15px; }
+            body { padding: 5px; }
+            .container { 
+                max-width: none; 
+                width: 100%; 
+                padding: 10px; 
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            }
             table { font-size: 16px; }
             td.data-cell { padding: 8px 4px; height: 44px; font-size: 18px; }
             .digit-input { width: 22px; height: 22px; font-size: 12px; }
