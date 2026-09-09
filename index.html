@@ -129,7 +129,7 @@
             gap: 4px;
         }
         .mark-input {
-            width: 28px;
+            width: 50px;
             height: 22px;
             font-size: 12px;
             text-align: center;
@@ -635,8 +635,8 @@
                 markInput.value = initialData.mark;
             }
             markInput.addEventListener('input', function() {
-                if (this.value.length > 2) {
-                    this.value = this.value.slice(0, 2);
+                if (this.value.length > 4) {
+                    this.value = this.value.slice(0, 4);
                 }
                 saveToLocal();
             });
@@ -829,7 +829,7 @@
                 let mark = '';
                 let numPart = line;
 
-                const markMatch = numPart.match(/\|M(\d+)$/);
+                const markMatch = numPart.match(/\|M(\d{1,4})$/);
                 if (markMatch) {
                     mark = markMatch[1];
                     numPart = numPart.slice(0, numPart.lastIndexOf('|M'));
