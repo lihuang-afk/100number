@@ -239,7 +239,8 @@
         .temp-note-textarea {
             width: 100%;
             max-width: 100%;
-            height: 80px;
+            min-height: 80px;
+            field-sizing: content;
             border: 2px solid #ddd;
             border-radius: 8px;
             outline: none;
@@ -378,7 +379,7 @@
             th { padding: 10px 4px; font-size: 14px; }
             th.input-header, td.input-cell { width: 85px; }
             h1 { font-size: 20px; }
-            .temp-note-textarea { height: 60px; font-size: 14px; }
+            .temp-note-textarea { min-height: 60px; font-size: 14px; }
             .mark-input { width: 44px; height: 20px; font-size: 10px; }
             .theme-btn { width: 15px; height: 15px; }
             .toggle-btn { width: 22px; height: 22px; font-size: 16px; }
@@ -886,8 +887,16 @@
         });
 
         tempNote.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
             saveNoteToLocal();
         });
+        // 初始加载时也撑开已有内容
+        function autoResizeNote() {
+            tempNote.style.height = 'auto';
+            tempNote.style.height = tempNote.scrollHeight + 'px';
+        }
+        autoResizeNote();
 
         function init() {
             const savedData = loadFromLocal();
