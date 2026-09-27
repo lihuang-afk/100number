@@ -313,6 +313,22 @@
         .btn-show-hidden.show {
             display: inline-block !important;
         }
+        .btn-clear-theme {
+            background: #fff;
+            color: #8e44ad;
+            border: 2px solid #8e44ad;
+            padding: 8px 20px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        .btn-clear-theme:hover {
+            background: #8e44ad;
+            color: #fff;
+        }
         .modal-overlay {
             display: none;
             position: fixed;
@@ -404,6 +420,7 @@
         <div style="text-align: center; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 12px;">
             <button class="btn btn-export" onclick="addNewRow()" style="background: #3498db;">+ 添加空白行</button>
             <button class="btn btn-show-hidden" id="showHiddenBtn" onclick="showAllRows()" style="display: none;">取消隐藏</button>
+            <button class="btn btn-clear-theme" id="clearThemeBtn" onclick="clearAllThemes()" style="display: none;">取消颜色</button>
         </div>
 
         <div class="temp-note-area">
@@ -552,6 +569,29 @@
             }
         }
 
+        function updateClearThemeBtn() {
+            const hasTheme = Array.from(tbody.querySelectorAll('tr')).some(
+                row => (row.dataset.rowTheme || 'default') !== 'default'
+            );
+            document.getElementById('clearThemeBtn').style.display = hasTheme ? '' : 'none';
+        }
+
+        function clearAllThemes() {
+            const rows = tbody.querySelectorAll('tr');
+            let changed = 0;
+            rows.forEach(row => {
+                if ((row.dataset.rowTheme || 'default') !== 'default') changed++;
+                row.dataset.rowTheme = 'default';
+                const yellowBtn = row.querySelector('.theme-btn-yellow');
+                const greenBtn = row.querySelector('.theme-btn-green');
+                if (yellowBtn) yellowBtn.classList.remove('active');
+                if (greenBtn) greenBtn.classList.remove('active');
+                updateRow(row.dataset.rowId);
+            });
+            saveToLocal();
+            updateClearThemeBtn();
+        }
+
         function showAllRows() {
             const collapsedRows = tbody.querySelectorAll('tr.collapsed');
             collapsedRows.forEach(row => {
@@ -587,6 +627,7 @@
 
             updateRow(rowIdx);
             saveToLocal();
+            updateClearThemeBtn();
         }
 
         function createRow(initialData) {
@@ -876,6 +917,7 @@
             saveToLocal();
             updateRowCount();
             updateShowAllBtn();
+            updateClearThemeBtn();
             hideImportModal();
             alert(`成功导入 ${Math.min(validData.length, MAX_ROWS)} 行数据！`);
         }
@@ -915,6 +957,7 @@
             loadNoteFromLocal();
             updateRowCount();
             updateShowAllBtn();
+            updateClearThemeBtn();
             setTimeout(() => {
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }, 100);
