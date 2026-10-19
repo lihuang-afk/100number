@@ -441,8 +441,9 @@
     <div class="modal-overlay" id="importModal">
         <div class="modal">
             <h3>导入数据</h3>
-            <p style="color:#666; font-size:13px; margin-bottom:10px;">每行输入4个数字，例如：<code>2568</code> 或 <code>2,5,6,8</code></p>
-            <textarea id="importText" placeholder="在此粘贴数据..."></textarea>
+            <p style="color:#666; font-size:13px; margin-bottom:10px;">选择 txt 文件直接导入，或手动粘贴数据。每行4个数字，例如：<code>2568</code> 或 <code>2,5,6,8</code></p>
+            <input type="file" id="importFile" accept=".txt,text/plain" style="width:100%; margin-bottom:10px; font-size:14px; padding:8px; border:2px solid #ddd; border-radius:8px; cursor:pointer;">
+            <textarea id="importText" placeholder="在此粘贴数据，或选择txt文件后自动填入..."></textarea>
             <div class="modal-btns">
                 <button class="btn btn-cancel" onclick="hideImportModal()">取消</button>
                 <button class="btn btn-confirm" onclick="importData()">确认导入</button>
@@ -462,7 +463,28 @@
         const importModal = document.getElementById('importModal');
         const importText = document.getElementById('importText');
         const tempNote = document.getElementById('tempNote');
+        const importFile = document.getElementById('importFile');
         let saveTimer = null;
+
+        // 选择txt文件后自动读取内容填入文本框
+        importFile.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            if (!/\.txt$/i.test(file.name) && file.type !== 'text/plain') {
+                alert('请选择 .txt 格式文件！');
+                this.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                importText.value = e.target.result;
+                importText.focus();
+            };
+            reader.onerror = function() {
+                alert('文件读取失败，请重试！');
+            };
+            reader.readAsText(file, 'UTF-8');
+        });
 
         function saveToLocal() {
             const rows = tbody.querySelectorAll('tr');
@@ -859,6 +881,7 @@
 
         function showImportModal() {
             importText.value = '';
+            if (importFile) importFile.value = '';
             importModal.classList.add('active');
             importText.focus();
         }
