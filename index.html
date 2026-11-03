@@ -153,6 +153,36 @@
             -webkit-appearance: none;
             margin: 0;
         }
+        /* 新增：手动输入列 */
+        th.manual-header {
+            background: #8e44ad;
+            border: 2px solid #6c3483;
+            width: 80px;
+            font-size: 14px;
+            padding: 10px 4px;
+        }
+        td.manual-cell {
+            border: 2px solid #8e44ad;
+            padding: 4px 2px;
+            background: #f8f4fb;
+            width: 80px;
+            text-align: center;
+        }
+        .manual-input {
+            width: 48px;
+            height: 28px;
+            font-size: 14px;
+            text-align: center;
+            border: 1.5px solid #bdc3c7;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            padding: 0;
+        }
+        .manual-input:focus {
+            border-color: #8e44ad;
+            box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.2);
+        }
         .theme-btn {
             width: 18px;
             height: 18px;
@@ -397,6 +427,7 @@
             h1 { font-size: 20px; }
             .temp-note-textarea { min-height: 90px; font-size: 14px; }
             .mark-input { width: 44px; height: 20px; font-size: 10px; }
+            .manual-input { width: 40px; height: 22px; font-size: 12px; }
             .theme-btn { width: 15px; height: 15px; }
             .toggle-btn { width: 22px; height: 22px; font-size: 16px; }
             .row2-controls { gap: 2px; }
@@ -411,7 +442,7 @@
                 <tr>
                     <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
                     <th>6</th><th>7</th><th>8</th><th>9</th><th>0</th>
-                    <th class="input-header">输入</th>
+                    <th class="input-header">输入</th><th class="manual-header">手动</th>
                 </tr>
             </thead>
             <tbody id="tbody"></tbody>
@@ -494,8 +525,9 @@
                 const values = Array.from(inputs).map(inp => inp.value);
                 const theme = row.dataset.rowTheme || 'default';
                 const mark = row.querySelector('.mark-input') ? row.querySelector('.mark-input').value : '';
+                const manual = row.querySelector('.manual-input') ? row.querySelector('.manual-input').value : '';
                 const collapsed = row.classList.contains('collapsed');
-                data.push({ values: values, theme: theme, mark: mark, collapsed: collapsed });
+                data.push({ values: values, theme: theme, mark: mark, collapsed: collapsed, manual: manual });
             });
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -758,6 +790,23 @@
             inputTd.appendChild(wrapper);
             tr.appendChild(inputTd);
 
+            // 新增：手动输入列（每行一个格子，可手动输入）
+            const manualTd = document.createElement('td');
+            manualTd.className = 'manual-cell';
+            const manualInput = document.createElement('input');
+            manualInput.type = 'text';
+            manualInput.className = 'manual-input';
+            manualInput.maxLength = 4;
+            manualInput.placeholder = '';
+            if (initialData && initialData.manual !== undefined) {
+                manualInput.value = initialData.manual;
+            }
+            manualInput.addEventListener('input', function() {
+                saveToLocal();
+            });
+            manualTd.appendChild(manualInput);
+            tr.appendChild(manualTd);
+
             inputs.forEach((inp, idx) => {
                 inp.addEventListener('input', function() {
                     let val = this.value;
@@ -854,11 +903,13 @@
                 const values = Array.from(inputs).map(inp => inp.value);
                 const theme = row.dataset.rowTheme || 'default';
                 const mark = row.querySelector('.mark-input') ? row.querySelector('.mark-input').value : '';
+                const manual = row.querySelector('.manual-input') ? row.querySelector('.manual-input').value : '';
                 if (values.some(v => v !== '')) {
                     let line = values.join('');
                     if (theme === 'yellow') line += '|Y';
                     else if (theme === 'green') line += '|G';
                     if (mark) line += '|M' + mark;
+                    if (manual) line += '|H' + manual;
                     data.push(line);
                 }
             });
@@ -901,12 +952,19 @@
             lines.forEach(line => {
                 let theme = 'default';
                 let mark = '';
+                let manual = '';
                 let numPart = line;
 
                 const markMatch = numPart.match(/\|M(\d{1,4})$/);
                 if (markMatch) {
                     mark = markMatch[1];
                     numPart = numPart.slice(0, numPart.lastIndexOf('|M'));
+                }
+
+                const manualMatch = numPart.match(/\|H(.+)$/);
+                if (manualMatch) {
+                    manual = manualMatch[1];
+                    numPart = numPart.slice(0, numPart.lastIndexOf('|H'));
                 }
 
                 if (numPart.endsWith('|Y')) {
@@ -919,10 +977,10 @@
 
                 let digits = numPart.replace(/[^0-9]/g, '').split('');
                 if (digits.length >= 4) {
-                    validData.push({ values: digits.slice(0, 4), theme: theme, mark: mark });
+                    validData.push({ values: digits.slice(0, 4), theme: theme, mark: mark, manual: manual });
                 } else if (digits.length > 0) {
                     while (digits.length < 4) digits.push('');
-                    validData.push({ values: digits, theme: theme, mark: mark });
+                    validData.push({ values: digits, theme: theme, mark: mark, manual: manual });
                 }
             });
             if (validData.length === 0) {
